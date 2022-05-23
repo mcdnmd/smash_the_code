@@ -5,10 +5,10 @@ import (
 	"smash_the_code/lib"
 )
 
-func ApplyBlock(state *State, block *Block) bool {
+func ApplyBlock(state *State, block *Block) (bool, *[][]Cell) {
 	status := state.Map.SetBlock(block)
 	if !status {
-		return false
+		return false, nil
 	}
 
 	visited := make([]bool, MapWidth*MapHeight)
@@ -40,8 +40,8 @@ func ApplyBlock(state *State, block *Block) bool {
 
 	ApplyAllMapMutations(state, &colors, &removedCellChains)
 
-	state.UpdateScore(colors, &removedCellChains)
-	return true
+	//state.UpdateScore(colors, &removedCellChains)
+	return true, &removedCellChains
 }
 
 func ApplyAllMapMutations(state *State, colorsPtr *[]bool, removedCellChainsPtr *[][]Cell) {

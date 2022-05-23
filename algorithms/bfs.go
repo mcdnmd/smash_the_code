@@ -26,9 +26,13 @@ func BFS(gridPtr *[][]bot.Cell, startCell bot.Cell, visitedPtr *[]bool) (chain [
 			position := area4[i]
 			if position.InMap(bot.MapWidth, bot.MapHeight) {
 				hashPosition := bot.GetHashPosition(*position)
-				if (grid[position.Y][position.X].Color == color) && !visited[hashPosition] {
-					queue = append(queue, *position)
-					chain = append(chain, *grid[position.Y][position.X].Clone())
+				if (grid[position.Y][position.X].Color == color || grid[position.Y][position.X].Color == bot.SkullColor) && !visited[hashPosition] {
+					if grid[position.Y][position.X].Color != bot.SkullColor {
+						queue = append(queue, *position)
+					}
+					if len(chain) > 0 || grid[position.Y][position.X].Color == color {
+						chain = append(chain, *grid[position.Y][position.X].Clone())
+					}
 					visited[hashPosition] = true
 				}
 			}

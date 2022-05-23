@@ -69,10 +69,11 @@ func main() {
 			}
 		}
 		//place, rotation := Logic2(MyState)
-		sequence := algorithms.GreedySearch(MyState)
+		sequence, count := algorithms.GreedySearch(MyState)
 		step := sequence[0]
 		fmt.Println(step.Place, step.Rotation)
 		fmt.Fprintln(os.Stderr, "Round duration:", time.Since(startTime).Milliseconds(), "ms")
+		fmt.Fprintln(os.Stderr, "Greedy loops:", count, "times")
 	}
 }
 

@@ -3,40 +3,61 @@ package algorithms
 import (
 	"math/rand"
 	"smash_the_code/bot"
+	"time"
 )
 
-func GreedySearch(baseState *bot.State) []bot.Block {
+// Score state in the end of loop
+
+const GreedyLookup = 1
+
+func GreedySearch(baseState *bot.State) ([]bot.Block, int) {
 	state := baseState
-	sequence := make([]bot.Block, 8)
 
-	for i := range baseState.QueueBlocks {
-		block := baseState.QueueBlocks[i]
-		possibleBlocks := bot.GetAllPossibleBlocks(*block)
-		scoredStates := make(map[int][]bot.State)
+	startTime := time.Now()
+	duration := time.Since(startTime)
+	scoredSteps := make(map[int][]bot.Block)
+	best := 0
+	c := 0
 
-		best := state.Score
+	for duration.Milliseconds() < 65 {
 
-		//fmt.Println(i, " BEST befor ", best)
-		for j := range possibleBlocks {
+		greedyState := state.Clone()
 
-			cloneState := state.Clone()
-			b := possibleBlocks[j]
-			status := bot.ApplyBlock(cloneState, b)
-			if !status {
-				continue
+		tmpState := greedyState.Clone()
+		sequence := make([]bot.Block, GreedyLookup)
+
+		for i := range baseState.QueueBlocks[:GreedyLookup] {
+			cloneState := tmpState
+			block := baseState.QueueBlocks[i]
+			possibleBlocks := bot.GetAllPossibleBlocks(*block)
+			possibleStates := make([]bot.State, 0)
+
+			for j := range possibleBlocks {
+				cloneState2 := cloneState.Clone()
+				b := possibleBlocks[j]
+				status, _ := bot.ApplyBlock(cloneState2, b)
+				if !status {
+					continue
+				}
+				cloneState2.LastStep = *b
+				possibleStates = append(possibleStates, *cloneState2)
 			}
-			cloneState.LastStep = *b
-			scoredStates[cloneState.Score] = append(scoredStates[cloneState.Score], *cloneState)
-			if cloneState.Score > best {
-				best = cloneState.Score
-			}
+			idx := rand.Intn(len(possibleStates))
+			tmpState = &possibleStates[idx]
+			sequence[i] = tmpState.LastStep
 		}
 
-		bestStates := scoredStates[best]
-		idx := rand.Intn(len(bestStates))
-		state = &bestStates[idx]
-		sequence[i] = state.LastStep
-		//fmt.Println(i, " BEST after ", best)
+		_, chain := bot.ApplyBlock(greedyState, &sequence[0])
+		score := bot.CalcScore(*chain)
+
+		if score > best {
+			best = score
+		}
+
+		scoredSteps[score] = sequence
+		duration = time.Since(startTime)
+		c++
 	}
-	return sequence
+	//fmt.Fprintln(os.Stderr, "Best Score", best, scoredSteps)
+	return scoredSteps[best], c
 }

@@ -41,8 +41,7 @@ func (m *Map) FindEmptyCellsInColumns() []Cell {
 // SetBlock FIXME исправить баг, когда полностью заполняется столбец
 func (m *Map) SetBlock(b *Block) bool {
 	emptyCells := m.FindEmptyCellsInColumns()
-
-	if !b.Cell1.Position.InMap(MapWidth, MapHeight) || !b.Cell2.Position.InMap(MapWidth, MapHeight) {
+	if b.Cell1.Position == nil || b.Cell2.Position == nil || !b.Cell1.Position.InMap(MapWidth, MapHeight) || !b.Cell2.Position.InMap(MapWidth, MapHeight) {
 		return false
 	}
 
@@ -66,7 +65,7 @@ func (m *Map) SetBlock(b *Block) bool {
 		position2 = emptyCells[b.Cell2.Position.X].Position
 		position1 = &lib.V{X: position2.X, Y: position2.Y - 1}
 	}
-	//fmt.Fprintln(os.Stderr, "before set", b.Cell1.Position, b.Cell2.Position)
+	//fmt.Fprintln(os.Stderr, "BABAC", b.Cell1.Position, b.Cell2.Position)
 	if !position1.InMap(MapWidth, MapHeight) || !position2.InMap(MapWidth, MapHeight) {
 		return false
 	}
@@ -124,6 +123,7 @@ func GetHashPosition(v lib.V) int {
 	return v.Y*MapWidth + v.X
 }
 
+// Check if it has open
 func FindColorGroups(state *State) [][]Cell {
 	grid := state.Map.Grid
 	visited := make([]bool, MapHeight*MapWidth)
